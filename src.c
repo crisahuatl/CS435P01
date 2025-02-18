@@ -138,6 +138,7 @@ int main (int argc[], char* argv[]){
 
         if (currentToken == ID || currentToken == NUMBER){
             printf(" %s", lexeme); //prints actual lexeme read for the cooresponding token. Ex: (ID, x) or (NUMBER, 23)
+            printf("\n");
         }
     }
     fclose(src);
