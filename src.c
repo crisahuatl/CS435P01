@@ -41,7 +41,7 @@ enum tokenType scan() {
 
         /*===== IDENTIFIER LEXEME CASE =====*/
     
-        else if (isalpha(currentCh)) {  //NEEDS TO BE MODIFIED ***
+        else if (isalpha(currentCh) || currentCh == '_') {  //NEEDS TO BE MODIFIED ***
             lexeme[0] = currentCh;
             lexLen = 1;
             //temp = next char scanned. Do while scanned char is a char, num, or underscore, if all conditions met, temp is valid and can be evaluated.
@@ -66,19 +66,54 @@ enum tokenType scan() {
         }
 
         /*===== NUMBER LEXEME CASE =====*/
-
         else if (isdigit(currentCh)){
             //BUILD LEXEME FOR THE NUMBER
+            lexeme[0] = currentCh;
+            lexLen = 1;
+            for (tempCh = fgetc(src); isdigit(tempCh); tempCh = fgetc(src)) {
+                lexeme[lexLen] = tempCh;
+                lexLen++;
+            }
+
+            lexeme[lexLen] = "\0";
+            ungetc(tempCh, src);
             
             //finish fixing lexeme string, ungetc the last character read that is not a digit and then return a NUMBER
             return NUMBER; 
         }
         /*===== OPERATOR TOKEN LEXEME CASE =====*/
+        else if (currentCh == ":") {
+            tempCh = fgetc(src);
+            if (tempCh == '='){
+                return ASSIGN;
+            }
+            lexical_error(currentCh);
+        }
         else if (currentCh == '+'){
             return PLUS;
         }
+        else if (currentCh == "-") {
+            return MINUS;
+        }
+        else if (currentCh == "*") {
+            return TIMES;
+        }   
+        else if (currentCh == "/") {
+            return DIV;
+        }
+        else if (currentCh == ";") {
+            return SEMICOLON ;
+        }
+        else if (currentCh == ",") {
+            return COMMA;
+        }
+        else if (currentCh == "(") {
+            return LPAREN;
+        }
+        else if (currentCh == ")") {
+            return RPAREN;
+        }
         /*===== INVALID INPUT CHARACTER CASE =====*/
-
         //use selection statements to look for tokens for operators and delimiters and the assignment (:=)
         else {
             lexical_error(currentCh);
