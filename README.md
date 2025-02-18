@@ -1,4 +1,4 @@
-# CS435P01
+# CS435P01 
 Scanner for Simple_PL1
 Open a source file and scan it. Build lexemes by appending to a c-string, ignoring whitespaces.
 The scanner should take the file and return a stream of the file translated into tokens in each line. 
