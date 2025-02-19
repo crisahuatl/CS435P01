@@ -17,7 +17,7 @@ enum tokenType {
 char* mnemonic[] = { "READ", "WRITE", "ID", "NUMBER", "LPAREN", "RPAREN", "SEMICOLON", "COMMA", "ASSIGN", "PLUS", "MINUS", "TIMES", "DIV", "SCAN_EOF" };
 
 void lexical_error(char ch) {
-    fprintf(stderr, "Lexical error. Unexpected character: %c. \n", ch);
+    fprintf(stderr, "Lexical error. Unexpected character: %c  \n", ch);
 }
 
 char lexeme[265] = { '\0' };
@@ -51,19 +51,20 @@ enum tokenType scan() {
             for (tempCh = fgetc(src); isalnum(tempCh) || tempCh == '_'; tempCh = fgetc(src)) {
                 //BUILD IDENTIFIER LEXEME
                 //add characters into the lexeme container
-                if (lexLen <= 264) {     //stopping case if lexeme is too large
+                if (lexLen < 266) {     //stopping case if lexeme is too large
                     lexeme[lexLen] = tempCh;    //append next char to lexeme string
                     lexLen++;                   //adjust length after appending
                 }
                 else {
-                    fprintf(stderr, "Lexical error. Max lexeme length 256 reached.\n");
-                    return 1; //non-zero returned to indicate error
+                    fprintf(stderr, "Lexical error. Max lexeme length 265 reached \n");
+                    //non-zero returned to indicate error
                 }
             }
 
             lexeme[lexLen] = '\0'; //add sentinel value to current lexeme string
 
             //because the lexeme or string is complete here, we can test the completed string if it matches read/write
+            //NOTE: Assuming reserved words are not case sensitive -> use _stricmp()
             if (strcmp(lexeme, reserved[0]) == 0) { //
                 return READ;
             }
