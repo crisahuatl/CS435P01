@@ -15,9 +15,8 @@ enum tokenType {
 
 char* mnemonic[] = { "READ", "WRITE", "ID", "NUMBER", "LPAREN", "RPAREN", "SEMICOLON", "COMMA", "ASSIGN", "PLUS", "MINUS", "TIMES", "DIV", "SCAN_EOF" };
 
-int lexical_error(char ch) {
+void lexical_error(char ch) {
     fprintf(stderr, "Lexical error. Unexpected character: %c. \n", ch);
-    return 1;   //return 1 to indicate error
 }
 
 char lexeme[265] = { '\0' };
@@ -84,7 +83,7 @@ enum tokenType scan() {
             return NUMBER;
         }
         /*===== OPERATOR TOKEN LEXEME CASE =====*/
-        
+
         //NEED CASES FOR WRITE & READ
 
         else if (currentCh == ':') {
@@ -93,7 +92,7 @@ enum tokenType scan() {
                 return ASSIGN;
             }
             ungetc(tempCh, src);    //unget the character before sending lexical error to avoid loss of character
-            lexical_error(currentCh); 
+            lexical_error(currentCh); //if lexeme is a semicolon but not followed by =, then return an error
         }
         else if (currentCh == '+') {
             return PLUS;
