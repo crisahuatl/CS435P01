@@ -8,6 +8,7 @@
 #include <stdio.h>  //for c I/O
 #include <stdlib.h> //for exit()
 #include <ctype.h>  //for isalpha(), isalnum(), ...
+#include <string.h> //for strcmp
 
 enum tokenType {
     READ, WRITE, ID, NUMBER, LPAREN, RPAREN, SEMICOLON, COMMA, ASSIGN, PLUS, MINUS, TIMES, DIV, SCAN_EOF
@@ -62,6 +63,14 @@ enum tokenType scan() {
 
             lexeme[lexLen] = '\0'; //add sentinel value to current lexeme string
 
+            //because the lexeme or string is complete here, we can test the completed string if it matches read/write
+            if (strcmp(lexeme, reserved[0]) == 0) { //
+                return READ;
+            }
+            if (strcmp(lexeme, reserved[1]) == 0) {
+                return WRITE;
+            }
+
             ungetc(tempCh, src);    //put back character that is not an alpha/digit or '_'
             return ID;              //see if lememe is a reserved word. If not, return ID.
         }
@@ -83,8 +92,7 @@ enum tokenType scan() {
             return NUMBER;
         }
         /*===== OPERATOR TOKEN LEXEME CASE =====*/
-
-        //NEED CASES FOR WRITE & READ
+        //use selection statements to look for tokens for operators and delimiters and the assignment (:=)
 
         else if (currentCh == ':') {
             tempCh = fgetc(src);
@@ -119,7 +127,6 @@ enum tokenType scan() {
             return RPAREN;
         }
         /*===== INVALID INPUT CHARACTER CASE =====*/
-        //use selection statements to look for tokens for operators and delimiters and the assignment (:=)
         else {
             lexical_error(currentCh);
         }
