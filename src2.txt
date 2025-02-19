@@ -1,0 +1,6 @@
+abc123 , 456
+read and write
+READ and WRITE
+:= + - * / ; , ( )
+:=+-*/;,()
+:- 
