@@ -11,16 +11,16 @@
 #include <string.h> //for strcmp
 
 enum tokenType {
-    READ, WRITE, ID, NUMBER, LPAREN, RPAREN, SEMICOLON, COMMA, ASSIGN, PLUS, MINUS, TIMES, DIV, SCAN_EOF
+    READ, WRITE, ID, NUMBER, LPAREN, RPAREN, SEMICOLON, COMMA, ASSIGN, PLUS, MINUS, TIMES, DIV, SCAN_EOF, SIZE_ERROR
 };
 
-char* mnemonic[] = { "READ", "WRITE", "ID", "NUMBER", "LPAREN", "RPAREN", "SEMICOLON", "COMMA", "ASSIGN", "PLUS", "MINUS", "TIMES", "DIV", "SCAN_EOF" };
+char* mnemonic[] = { "READ", "WRITE", "ID", "NUMBER", "LPAREN", "RPAREN", "SEMICOLON", "COMMA", "ASSIGN", "PLUS", "MINUS", "TIMES", "DIV", "SCAN_EOF", "SIZE_ERROR"};
 
 void lexical_error(char ch) {
     fprintf(stderr, "Lexical error. Unexpected character: %c  \n", ch);
 }
 
-char lexeme[265] = { '\0' };
+char lexeme[256] = { '\0' };    //this means our valid range is 0 - 255
 unsigned int lexLen = 0;
 FILE* src;
 
@@ -36,44 +36,45 @@ enum tokenType scan() {
         return SCAN_EOF; // if end of file, return the eof mnemonic token
     }
     while ((currentCh = fgetc(src)) != EOF) { // while current scan doesn't hit end of file
-
-
         if (isspace(currentCh)) {    //skips whitespace characters when scanning and goes to next iteration
             continue;
         }
-
         /*===== IDENTIFIER LEXEME CASE =====*/
 
         else if (isalpha(currentCh) || currentCh == '_') {  //NEEDS TO BE MODIFIED ***
             lexeme[0] = currentCh;
-            lexLen = 1;
-            //temp = next char scanned. Do while scanned char is a char, num, or underscore, if all conditions met, temp is valid and can be evaluated.
+            lexLen = 1;   //at this stage, we currently have the first character of an identifier lexeme
+
+            //use temp to peek at next character, evaluate if its valid for an identifier lexeme, get next char after
             for (tempCh = fgetc(src); isalnum(tempCh) || tempCh == '_'; tempCh = fgetc(src)) {
-                //BUILD IDENTIFIER LEXEME
-                //add characters into the lexeme container
-                if (lexLen < 266) {     //stopping case if lexeme is too large
-                    lexeme[lexLen] = tempCh;    //append next char to lexeme string
-                    lexLen++;                   //adjust length after appending
+                if (lexLen < 255) { //256 reserved for '\0'
+                    lexeme[lexLen] = tempCh;
+                    lexLen++;
                 }
                 else {
-                    fprintf(stderr, "Lexical error. Max lexeme length 265 reached \n");
-                    //non-zero returned to indicate error
+                    fprintf(stderr, "Lexical error. Max lexeme length 255 reached\n");
+                   //Scan the extra characters in the lexeme without storing them to
+                   //avoid ignoring valid identifiers after an invalid size lexeme
+                    for (tempCh = fgetc(src); isalnum(tempCh) || tempCh == '_'; tempCh = fgetc(src)) {
+                        lexeme[lexLen] = tempCh;
+                    }
                 }
+              
             }
+            lexeme[lexLen] = '\0'; //terminate lexeme by adding sentinel value
+            ungetc(tempCh, src);   //return the first non-ID character back to the file stream
 
-            lexeme[lexLen] = '\0'; //add sentinel value to current lexeme string
-
-            //because the lexeme or string is complete here, we can test the completed string if it matches read/write
-            //NOTE: Assuming reserved words are not case sensitive -> use _stricmp()
-            if (strcmp(lexeme, reserved[0]) == 0) { //
+            if (strcmp(lexeme, reserved[0]) == 0) {
                 return READ;
             }
             if (strcmp(lexeme, reserved[1]) == 0) {
                 return WRITE;
             }
-
-            ungetc(tempCh, src);    //put back character that is not an alpha/digit or '_'
-            return ID;              //see if lememe is a reserved word. If not, return ID.
+            if (lexLen >= 255) {
+                return SIZE_ERROR;
+            }
+     
+            return ID;
         }
 
         /*===== NUMBER LEXEME CASE =====*/
@@ -101,7 +102,7 @@ enum tokenType scan() {
                 return ASSIGN;
             }
             ungetc(tempCh, src);    //unget the character before sending lexical error to avoid loss of character
-            lexical_error(currentCh); //if lexeme is a semicolon but not followed by =, then return an error
+            lexical_error(currentCh); //if lexeme is a semicolon but not followed by =, then return an error for the semicolon and preserve the following character
         }
         else if (currentCh == '+') {
             return PLUS;
