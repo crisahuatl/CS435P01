@@ -56,7 +56,8 @@ enum tokenType scan() {
                    //Scan the extra characters in the lexeme without storing them to
                    //avoid ignoring valid identifiers after an invalid size lexeme
                     for (tempCh = fgetc(src); isalnum(tempCh) || tempCh == '_'; tempCh = fgetc(src)) {
-                        lexeme[lexLen] = tempCh;
+                        //This statement is unnecessary as we just need to iterate through the lexeme
+                        //lexeme[lexLen] = tempCh;
                     }
                 }
               
