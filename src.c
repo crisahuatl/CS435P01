@@ -64,6 +64,7 @@ enum tokenType scan() {
             lexeme[lexLen] = '\0'; //terminate lexeme by adding sentinel value
             ungetc(tempCh, src);   //return the first non-ID character back to the file stream
 
+            //considering the regular expression definition for read/write is case sensitive, strcmp works
             if (strcmp(lexeme, reserved[0]) == 0) {
                 return READ;
             }
