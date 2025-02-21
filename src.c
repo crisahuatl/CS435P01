@@ -28,9 +28,9 @@ enum tokenType scan() {
     static int currentCh = ' ';
     static int tempCh = ' ';
     char* reserved[2] = { "read", "write" };
-    lexLen = 0; //clear lexeme buffer for each scan
+    lexLen = 0; 
     lexeme[0] = '\0';
-    extern FILE* src;   //pointer to FILE handle that binds to source file
+    extern FILE* src;  
 
     if (feof(src)) {    //EOF indicator is set when a read operation attempts to read past the end of a file
         return SCAN_EOF; // if end of file, return the eof mnemonic token
@@ -41,7 +41,7 @@ enum tokenType scan() {
         }
         /*===== IDENTIFIER LEXEME CASE =====*/
 
-        else if (isalpha(currentCh) || currentCh == '_') {  //NEEDS TO BE MODIFIED ***
+        else if (isalpha(currentCh) || currentCh == '_') {
             lexeme[0] = currentCh;
             lexLen = 1;   //at this stage, we currently have the first character of an identifier lexeme
 
@@ -56,8 +56,7 @@ enum tokenType scan() {
                    //Scan the extra characters in the lexeme without storing them to
                    //avoid ignoring valid identifiers after an invalid size lexeme
                     for (tempCh = fgetc(src); isalnum(tempCh) || tempCh == '_'; tempCh = fgetc(src)) {
-                        //This statement is unnecessary as we just need to iterate through the lexeme
-                        //lexeme[lexLen] = tempCh;
+                       //this is empty because we just need to iterate through the lexeme
                     }
                 }
               
@@ -84,16 +83,30 @@ enum tokenType scan() {
             lexeme[0] = currentCh;
             lexLen = 1;
             for (tempCh = fgetc(src); isdigit(tempCh); tempCh = fgetc(src)) {
-                lexeme[lexLen] = tempCh;
-                lexLen++;
-            }
 
+                if (lexLen < 255) { //256 reserved for '\0'
+                    lexeme[lexLen] = tempCh;
+                    lexLen++;
+                }
+                else {
+                    fprintf(stderr, "Lexical error. Max lexeme length 255 reached\n");
+                    //Scan the extra characters in the lexeme without storing them to
+                    //avoid ignoring valid identifiers after an invalid size lexeme
+                    for (tempCh = fgetc(src); isdigit(tempCh); tempCh = fgetc(src)) {
+                        //empty
+                    }
+                }
+            }
+            //finish fixing lexeme string, ungetc the last character read that is not a digit and then return a NUMBER
             lexeme[lexLen] = '\0';
             ungetc(tempCh, src);
 
-            //finish fixing lexeme string, ungetc the last character read that is not a digit and then return a NUMBER
+            if (lexLen >= 255) {
+                return SIZE_ERROR;
+            }
             return NUMBER;
         }
+
         /*===== OPERATOR TOKEN LEXEME CASE =====*/
         //use selection statements to look for tokens for operators and delimiters and the assignment (:=)
 
