@@ -9,7 +9,7 @@
 #include <stdlib.h> //for exit()
 #include <ctype.h>  //for isalpha(), isalnum(), ...
 #include <string.h> //for strcmp
-
+//Added the tokenType and mnemonic SIZE_ERROR to return if a lexeme is too large to avoid overflow
 enum tokenType {
     READ, WRITE, ID, NUMBER, LPAREN, RPAREN, SEMICOLON, COMMA, ASSIGN, PLUS, MINUS, TIMES, DIV, SCAN_EOF, SIZE_ERROR
 };
